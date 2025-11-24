@@ -1,123 +1,242 @@
 import streamlit as st
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-st.title("📊 Data Visualization Dashboard")
+st.title("📊 Visualizations – Bantuan Sosial & Kesejahteraan")
 
-# Cek session_state
-if "cluster_data" not in st.session_state:
-    st.warning("⚠️ Lakukan analisis clustering terlebih dahulu!")
+# Cek data
+if "data" not in st.session_state or st.session_state["data"] is None:
+    st.warning("Silakan lakukan preprocessing dan analysis terlebih dahulu!")
     st.stop()
 
-data = st.session_state["cluster_data"]
+df = st.session_state["data"]
 
-# Cek cluster
-if "Cluster" not in data.columns:
-    st.error("❌ Hasil clustering belum tersedia.")
-    st.stop()
+st.subheader("📌 Data yang Digunakan")
+st.dataframe(df, use_container_width=True)
 
-numeric_cols = data.select_dtypes(include=['float', 'int']).columns
 
-if len(numeric_cols) < 2:
-    st.error("Minimal butuh 2 kolom numerik.")
-    st.stop()
+#   1. PERSENTASE NASIONAL
 
-# ===============================
-# 1. Scatter Plot (2 variabel)
-# ===============================
-st.subheader("📌 Scatter Plot (2 Variabel)")
+st.header("📘 1. Persentase Kontribusi Nasional per Provinsi")
 
-x_col = st.selectbox("Pilih kolom X", numeric_cols, index=0)
-y_col = st.selectbox("Pilih kolom Y", numeric_cols, index=1)
+# Hitung persentase
+df["Persen_KPM"] = df["Realisasi_Jumlah_KPM"] / df["Realisasi_Jumlah_KPM"].sum() * 100
+df["Persen_Anggaran"] = df["Realisasi_Anggaran"] / df["Realisasi_Anggaran"].sum() * 100
 
-fig, ax = plt.subplots()
-scatter = ax.scatter(data[x_col], data[y_col], c=data["Cluster"], cmap="tab10")
-ax.set_xlabel(x_col)
-ax.set_ylabel(y_col)
-ax.set_title("Scatter Plot Berdasarkan Cluster")
-ax.legend(*scatter.legend_elements(), title="Cluster")
+#  1.1 BAR CHART PERSENTASE KPM
+
+
+st.subheader("📍 Persentase KPM per Provinsi")
+
+fig, ax = plt.subplots(figsize=(14, 6))
+sns.barplot(x="Provinsi", y="Persen_KPM", data=df, ax=ax)
+
+ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+ax.set_ylabel("Persentase (%)")
+ax.set_title("Persentase Penerima Bantuan (KPM) per Provinsi")
+
+# Tambahkan label jumlah KPM di atas batang
+for i, row in df.iterrows():
+    ax.text(
+        i,
+        row["Persen_KPM"] + 0.3,     # sedikit di atas batang
+        f'{int(row["Realisasi_Jumlah_KPM"]):,}', 
+        ha='center',
+        fontsize=8
+    )
+
 st.pyplot(fig)
 
-# ===============================
-# 2. Scatter Matrix (Pairplot Manual)
-# ===============================
-st.subheader("📌 Pairplot Sederhana (Scatter Matrix)")
 
-selected_cols = st.multiselect("Pilih kolom untuk Pairplot", numeric_cols, default=numeric_cols[:3])
+#  1.2 BAR CHART PERSENTASE ANGGARAN
 
-if len(selected_cols) > 1:
-    fig, axes = plt.subplots(len(selected_cols), len(selected_cols), figsize=(12, 12))
 
-    for i in range(len(selected_cols)):
-        for j in range(len(selected_cols)):
-            if i == j:
-                axes[i, j].hist(data[selected_cols[i]])
-                axes[i, j].set_title(f"{selected_cols[i]}")
-            else:
-                axes[i, j].scatter(data[selected_cols[j]], data[selected_cols[i]],
-                                   c=data["Cluster"], cmap="tab10", s=5)
-    st.pyplot(fig)
+st.subheader("📍 Persentase Anggaran Bansos per Provinsi")
 
-# ===============================
-# 3. Heatmap Korelasi
-# ===============================
-st.subheader("📌 Heatmap Korelasi Fitur")
+fig, ax = plt.subplots(figsize=(14, 6))
+sns.barplot(x="Provinsi", y="Persen_Anggaran", data=df, ax=ax)
 
-corr = data[numeric_cols].corr()
+ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+ax.set_ylabel("Persentase (%)")
+ax.set_title("Persentase Anggaran Bantuan Sosial per Provinsi")
 
-fig, ax = plt.subplots(figsize=(8, 6))
-heatmap = ax.imshow(corr, cmap="coolwarm")
-plt.xticks(range(len(corr.columns)), corr.columns, rotation=45)
-plt.yticks(range(len(corr.columns)), corr.columns)
-plt.colorbar(heatmap)
+# Tambahkan label anggaran di atas batang
+for i, row in df.iterrows():
+    ax.text(
+        i,
+        row["Persen_Anggaran"] + 0.3,
+        f'Rp {row["Realisasi_Anggaran"]:,.0f}',
+        ha='center',
+        fontsize=8
+    )
+
 st.pyplot(fig)
 
-# ===============================
-# 4. Jumlah Data per Cluster (Bar Chart)
-# ===============================
-st.subheader("📌 Jumlah Data per Cluster")
 
-cluster_count = data["Cluster"].value_counts().sort_index()
 
-fig, ax = plt.subplots()
-ax.bar(cluster_count.index, cluster_count.values)
-ax.set_xlabel("Cluster")
-ax.set_ylabel("Jumlah Data")
-ax.set_title("Jumlah Data per Cluster")
+#  2. REALISASI VS RENCANA
+
+
+st.header("📗 2. Persentase Realisasi dibanding Rencana")
+
+# Hitung persentase realisasi
+df["Realisasi_vs_Rencana_KPM"] = (df["Realisasi_Jumlah_KPM"] / df["Rencana_Jumlah_KPM"]) * 100
+df["Realisasi_vs_Rencana_Anggaran"] = (df["Realisasi_Anggaran"] / df["Rencana_Anggaran"]) * 100
+
+
+
+# 2.1 BAR CHART – REALISASI KPM (%) terhadap RENACANA
+
+st.subheader("📍 Persentase Realisasi KPM terhadap Rencana")
+
+fig, ax = plt.subplots(figsize=(14, 6))
+sns.barplot(x="Provinsi", y="Realisasi_vs_Rencana_KPM", data=df, ax=ax)
+
+ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+ax.set_ylabel("Persentase (%)")
+ax.set_title("Persentase Realisasi Jumlah KPM terhadap Rencana")
+ax.axhline(100, color="red", linestyle="--")
+
+
+# = label persentase di atas batang =
+for p, value in zip(ax.patches, df["Realisasi_vs_Rencana_KPM"]):
+    ax.text(
+        p.get_x() + p.get_width() / 2,
+        p.get_height() + 1,
+        f"{value:.1f}%",
+        ha="center",
+        va="bottom",
+        fontsize=8,
+        rotation=0,
+        fontweight="bold"
+    )
+
 st.pyplot(fig)
 
-# ===============================
-# 5. 3D Scatter Plot
-# ===============================
-if len(numeric_cols) >= 3:
-    st.subheader("📌 3D Scatter Plot")
 
-    x3 = st.selectbox("X (3D)", numeric_cols, index=0, key="x3")
-    y3 = st.selectbox("Y (3D)", numeric_cols, index=1, key="y3")
-    z3 = st.selectbox("Z (3D)", numeric_cols, index=2, key="z3")
+# 2.2 BAR CHART – REALISASI ANGGARAN (%) terhadap RENCANA
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    img = ax.scatter(data[x3], data[y3], data[z3], c=data["Cluster"], cmap="tab10")
-    ax.set_xlabel(x3)
-    ax.set_ylabel(y3)
-    ax.set_zlabel(z3)
-    ax.set_title("3D Scatter Plot")
-    st.pyplot(fig)
 
-# ===============================
-# 6. Boxplot per Fitur per Cluster
-# ===============================
-st.subheader("📌 Boxplot Fitur Berdasarkan Cluster")
+st.subheader("📍 Persentase Realisasi Anggaran terhadap Rencana")
 
-feat = st.selectbox("Pilih fitur", numeric_cols)
+fig, ax = plt.subplots(figsize=(14, 6))
+sns.barplot(x="Provinsi", y="Realisasi_vs_Rencana_Anggaran", data=df, ax=ax)
 
-fig, ax = plt.subplots()
-data.boxplot(column=feat, by="Cluster", ax=ax)
-ax.set_title(f"Boxplot {feat} per Cluster")
-ax.set_xlabel("Cluster")
-ax.set_ylabel(feat)
-plt.suptitle("")
+ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+ax.set_ylabel("Persentase (%)")
+ax.set_title("Persentase Realisasi Anggaran terhadap Rencana")
+ax.axhline(100, color="red", linestyle="--")
+
+# === Tambahkan label persentase ===
+for p, value in zip(ax.patches, df["Realisasi_vs_Rencana_Anggaran"]):
+    ax.text(
+        p.get_x() + p.get_width() / 2,
+        p.get_height() + 1,
+        f"{value:.1f}%",
+        ha="center",
+        va="bottom",
+        fontsize=8,
+        rotation=0,
+        fontweight="bold"
+    )
+
 st.pyplot(fig)
+
+#   3. HUBUNGAN DATA
+
+st.header("📙 3. Visualisasi Hubungan (Correlation)")
+
+# Scatter hubungan KPM & Anggaran
+st.subheader("🔸 Scatter: KPM vs Anggaran")
+
+fig, ax = plt.subplots(figsize=(7, 5))
+sns.scatterplot(
+    x="Realisasi_Jumlah_KPM",
+    y="Realisasi_Anggaran",
+    data=df,
+    s=120
+)
+ax.set_xlabel("Jumlah KPM")
+ax.set_ylabel("Anggaran (Rp)")
+st.pyplot(fig)
+
+# Scatter + regression line
+st.subheader("🔸 Scatter + Garis Regresi")
+
+fig, ax = plt.subplots(figsize=(7, 5))
+sns.regplot(
+    x="Realisasi_Jumlah_KPM",
+    y="Realisasi_Anggaran",
+    data=df,
+    scatter_kws={"s": 120}
+)
+ax.set_xlabel("Jumlah KPM")
+ax.set_ylabel("Anggaran (Rp)")
+st.pyplot(fig)
+
+# Heatmap korelasi
+st.subheader("🔸 Heatmap Korelasi")
+
+corr = df[[
+    "Realisasi_Jumlah_KPM",
+    "Realisasi_Anggaran",
+    "Rencana_Jumlah_KPM",
+    "Rencana_Anggaran"
+]].corr()
+
+fig, ax = plt.subplots(figsize=(6, 4))
+sns.heatmap(corr, annot=True, cmap="coolwarm", linewidths=0.5, ax=ax)
+st.pyplot(fig)
+
+
+#   4. CLUSTERING 
+
+st.subheader("📌 Clustering Provinsi Berdasarkan Kebutuhan Bantuan Sosial (Lebih Jelas)")
+
+# Ubah skala anggaran ke per 10 juta
+df["Realisasi_Anggaran_10Juta"] = df["Realisasi_Anggaran"] / 10_000_000
+
+# Tambahkan jitter agar titik tidak saling bertumpukan
+import numpy as np
+df["KPM_jitter"] = df["Realisasi_Jumlah_KPM"] + np.random.uniform(-0.5, 0.5, size=len(df))
+df["Anggaran_jitter"] = df["Realisasi_Anggaran_10Juta"] + np.random.uniform(-0.3, 0.3, size=len(df))
+
+fig, ax = plt.subplots(figsize=(12, 7))
+
+sns.scatterplot(
+    x="KPM_jitter",
+    y="Anggaran_jitter",
+    hue="Cluster",
+    palette="tab10",
+    data=df,
+    s=220,
+    alpha=0.7,
+    edgecolor="black"
+)
+
+ax.set_xlabel("Jumlah KPM (Keluarga Penerima Manfaat)")
+ax.set_ylabel("Anggaran (dalam satuan 10 Juta Rupiah)")
+ax.set_title("Clustering Provinsi Berdasarkan Kebutuhan Bantuan Sosial")
+
+# Tambahkan grid
+ax.grid(True, linestyle="--", alpha=0.5)
+
+# Tambahkan label provinsi (digeser agar tidak menumpuk)
+for i in range(df.shape[0]):
+    ax.text(
+        df["KPM_jitter"].iloc[i] + 0.5,
+        df["Anggaran_jitter"].iloc[i] + 0.5,
+        df["Provinsi"].iloc[i],
+        fontsize=9,
+        weight="bold"
+    )
+
+st.pyplot(fig)
+
+st.subheader("📄 Rangkuman Per Cluster (Rata-Rata)")
+summary = df.groupby("Cluster")[["Realisasi_Jumlah_KPM", "Realisasi_Anggaran"]].mean()
+summary["Realisasi_Anggaran (Rp)"] = summary["Realisasi_Anggaran"].apply(lambda x: f"{x:,.0f}")
+summary.drop(columns=["Realisasi_Anggaran"], inplace=True)
+
+st.dataframe(summary)

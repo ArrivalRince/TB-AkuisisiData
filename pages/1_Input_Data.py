@@ -1,13 +1,19 @@
 import streamlit as st
 import pandas as pd
 
-st.title("📤 Input Data")
+st.title("📥 Input Dataset BANSOS PANGAN")
 
-uploaded = st.file_uploader("Upload dataset CSV", type=["csv"])
+uploaded = st.file_uploader("Upload dataset (Excel/CSV)", type=["xlsx", "csv"])
 
 if uploaded:
-    df = pd.read_csv(uploaded)
-    st.success("Dataset berhasil diupload!")
-    st.write(df.head())
+    if uploaded.name.endswith(".csv"):
+        df = pd.read_csv(uploaded)
+    else:
+        df = pd.read_excel(uploaded)
 
-    st.session_state["raw_data"] = df
+    st.success("Dataset berhasil diupload!")
+    st.dataframe(df, use_container_width=True)
+
+    # Simpan ke folder data
+    df.to_csv("data/dataset.csv", index=False)
+    st.info("Dataset disimpan ke folder data/dataset.csv")

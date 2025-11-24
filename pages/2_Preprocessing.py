@@ -1,73 +1,97 @@
 import streamlit as st
 import pandas as pd
 
-st.title("🧹 Preprocessing Data")
+st.title("🧹 Preprocessing Data BANSOS PANGAN")
 
-# Pastikan dataset sudah diupload
-if "raw_data" not in st.session_state:
-    st.warning("Silakan upload dataset terlebih dahulu di menu *Input Data*.")
+# Load dataset
+try:
+    df = pd.read_csv("data/dataset.csv")
+except:
+    st.error("Dataset belum diupload. Silakan upload di menu Input Data.")
+    st.stop()
+
+st.subheader("📌 Data Sebelum Preprocessing")
+st.dataframe(df, use_container_width=True)
+
+# 1. Membersihkan baris tidak valid
+st.subheader("🗑 Menghapus Baris Tidak Valid (Indonesia, 0, Catatan, BPNT)")
+
+invalid_keywords = ["Indonesia", "0", "Catatan", "Bantuan Pangan Non-Tunai (BPNT)"]
+
+before_rows = df.shape[0]
+
+df = df[~df["Provinsi"].isin(invalid_keywords)]
+
+after_rows = df.shape[0]
+
+st.success(f"Baris dihapus: {before_rows - after_rows} baris")
+st.dataframe(df, use_container_width=True)
+
+
+# =========================
+# 2. Cek nilai kosong (NA)
+# =========================
+st.subheader("🔍 Deteksi Nilai Kosong (NA)")
+
+na_info = df.isna().sum()
+
+st.write(na_info)
+
+if na_info.sum() == 0:
+    st.info("Tidak ada nilai kosong dalam dataset.")
 else:
-    df = st.session_state["raw_data"]
+    st.warning("Dataset memiliki nilai kosong.")
 
-    st.subheader("📊 Statistik Sebelum Preprocessing")
-    st.write(df.describe(include="all"))
-    st.write("Jumlah data:", len(df))
-    st.write("Jumlah nilai kosong per kolom:")
-    st.write(df.isnull().sum())
+# =========================
+# 3. Opsi Penanganan Nilai Kosong
+# =========================
+st.subheader("⚙ Pilih Metode Penanganan NA")
 
-    st.markdown("---")
+option = st.radio(
+    "Pilih metode:",
+    [
+        "Isi nilai NA dengan MEAN",
+        "Isi nilai NA dengan 0",
+        "Hapus baris yang memiliki NA"
+    ]
+)
 
-    # ---------------------------
-    # HAPUS DUPLIKAT
-    # ---------------------------
-    st.subheader("🧽 Menghapus Data Duplikat")
+df_clean = df.copy()
 
-    duplicates = df.duplicated().sum()
-    st.write("Jumlah data duplikat:", duplicates)
+if option == "Isi nilai NA dengan MEAN":
+    numeric_cols = df_clean.select_dtypes(include=["float64", "int64"]).columns
+    df_clean[numeric_cols] = df_clean[numeric_cols].fillna(df_clean[numeric_cols].mean())
+    st.success("Nilai NA telah diisi dengan MEAN.")
 
-    if st.button("Hapus Duplikat"):
-        df = df.drop_duplicates()
-        st.success(f"{duplicates} data duplikat berhasil dihapus!")
+elif option == "Isi nilai NA dengan 0":
+    df_clean = df_clean.fillna(0)
+    st.success("Nilai NA telah diisi dengan 0.")
 
-    st.markdown("---")
+elif option == "Hapus baris yang memiliki NA":
+    df_clean = df_clean.dropna()
+    st.success("Baris berisi NA telah dihapus seluruhnya.")
 
-    # ---------------------------
-    # HANDLE MISSING VALUES
-    # ---------------------------
-    st.subheader("🩹 Mengatasi Nilai Kosong")
+# =========================
+# 4. Rename kolom panjang → Nama pendek
+# =========================
+df_clean.rename(columns={
+    "Rencana Jumlah Keluarga Penerima Manfaat (KPM) Bantuan Sosial Pangan (BANSOS PANGAN)": "Rencana_Jumlah_KPM",
+    "Realisasi Jumlah Keluarga Penerima Manfaat (KPM) Bantuan Sosial Pangan (BANSOS PANGAN)": "Realisasi_Jumlah_KPM",
+    "Rencana Anggaran Bantuan Sosial Pangan (BANSOS PANGAN) (Rp)": "Rencana_Anggaran",
+    "Realisasi Anggaran Bantuan Sosial Pangan (BANSOS PANGAN) (Rp)": "Realisasi_Anggaran"
+}, inplace=True)
 
-    method = st.radio(
-        "Pilih metode penanganan missing value:",
-        ["Hapus baris yang memiliki NaN", "Isi dengan Mean", "Isi dengan Median", "Isi dengan Mode"]
-    )
+# =========================
+# 5. Hasil Akhir
+# =========================
+st.subheader("📊 Data Setelah Preprocessing")
+st.dataframe(df_clean, use_container_width=True)
 
-    if st.button("Proses Missing Value"):
-        if method == "Hapus baris yang memiliki NaN":
-            df = df.dropna()
-            st.success("Baris yang memiliki NaN berhasil dihapus!")
+# Simpan hasil preprocessing ke CSV
+df_clean.to_csv("data/clean_dataset.csv", index=False)
 
-        elif method == "Isi dengan Mean":
-            df = df.fillna(df.mean(numeric_only=True))
-            st.success("Missing value berhasil diisi dengan Mean!")
+# 🔥 SIMPAN KE SESSION STATE AGAR BISA DIBACA HALAMAN ANALYSIS
+st.session_state["data"] = df_clean
 
-        elif method == "Isi dengan Median":
-            df = df.fillna(df.median(numeric_only=True))
-            st.success("Missing value berhasil diisi dengan Median!")
+st.success("Preprocessing selesai! Data disimpan dan siap dianalisis.")
 
-        elif method == "Isi dengan Mode":
-            df = df.fillna(df.mode().iloc[0])
-            st.success("Missing value berhasil diisi dengan Mode!")
-
-    st.markdown("---")
-
-    # ---------------------------
-    # STATISTIK SETELAH PREPROCESSING
-    # ---------------------------
-    st.subheader("📊 Statistik Setelah Preprocessing")
-    st.write(df.describe(include="all"))
-    st.write("Jumlah data:", len(df))
-    st.write("Jumlah nilai kosong per kolom:")
-    st.write(df.isnull().sum())
-
-    # Simpan hasil preprocessing ke session state
-    st.session_state["clean_data"] = df
