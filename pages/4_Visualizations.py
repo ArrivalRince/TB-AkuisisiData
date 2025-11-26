@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-st.title("📊 Visualizations – Bantuan Sosial & Kesejahteraan")
+st.title("Visualizations Bantuan Sosial & Kesejahteraan")
 
 # Cek data
 if "data" not in st.session_state or st.session_state["data"] is None:
@@ -12,22 +12,20 @@ if "data" not in st.session_state or st.session_state["data"] is None:
 
 df = st.session_state["data"]
 
-st.subheader("📌 Data yang Digunakan")
+st.subheader(" Data yang Digunakan")
 st.dataframe(df, use_container_width=True)
 
 
-#   1. PERSENTASE NASIONAL
+# 1. PERSENTASE NASIONAL
 
-st.header("📘 1. Persentase Kontribusi Nasional per Provinsi")
+st.header("1. Persentase Kontribusi Nasional per Provinsi")
 
 # Hitung persentase
 df["Persen_KPM"] = df["Realisasi_Jumlah_KPM"] / df["Realisasi_Jumlah_KPM"].sum() * 100
 df["Persen_Anggaran"] = df["Realisasi_Anggaran"] / df["Realisasi_Anggaran"].sum() * 100
 
 #  1.1 BAR CHART PERSENTASE KPM
-
-
-st.subheader("📍 Persentase KPM per Provinsi")
+st.subheader("Persentase KPM per Provinsi")
 
 fig, ax = plt.subplots(figsize=(14, 6))
 sns.barplot(x="Provinsi", y="Persen_KPM", data=df, ax=ax)
@@ -36,11 +34,11 @@ ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
 ax.set_ylabel("Persentase (%)")
 ax.set_title("Persentase Penerima Bantuan (KPM) per Provinsi")
 
-# Tambahkan label jumlah KPM di atas batang
+# label jumlah KPM di atas batang
 for i, row in df.iterrows():
     ax.text(
         i,
-        row["Persen_KPM"] + 0.3,     # sedikit di atas batang
+        row["Persen_KPM"] + 0.3,     
         f'{int(row["Realisasi_Jumlah_KPM"]):,}', 
         ha='center',
         fontsize=8
@@ -52,7 +50,7 @@ st.pyplot(fig)
 #  1.2 BAR CHART PERSENTASE ANGGARAN
 
 
-st.subheader("📍 Persentase Anggaran Bansos per Provinsi")
+st.subheader("Persentase Anggaran Bansos per Provinsi")
 
 fig, ax = plt.subplots(figsize=(14, 6))
 sns.barplot(x="Provinsi", y="Persen_Anggaran", data=df, ax=ax)
@@ -61,7 +59,7 @@ ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
 ax.set_ylabel("Persentase (%)")
 ax.set_title("Persentase Anggaran Bantuan Sosial per Provinsi")
 
-# Tambahkan label anggaran di atas batang
+# label anggaran di atas batang
 for i, row in df.iterrows():
     ax.text(
         i,
@@ -78,7 +76,7 @@ st.pyplot(fig)
 #  2. REALISASI VS RENCANA
 
 
-st.header("📗 2. Persentase Realisasi dibanding Rencana")
+st.header("2. Persentase Realisasi dibanding Rencana")
 
 # Hitung persentase realisasi
 df["Realisasi_vs_Rencana_KPM"] = (df["Realisasi_Jumlah_KPM"] / df["Rencana_Jumlah_KPM"]) * 100
@@ -88,7 +86,7 @@ df["Realisasi_vs_Rencana_Anggaran"] = (df["Realisasi_Anggaran"] / df["Rencana_An
 
 # 2.1 BAR CHART – REALISASI KPM (%) terhadap RENACANA
 
-st.subheader("📍 Persentase Realisasi KPM terhadap Rencana")
+st.subheader("Persentase Realisasi KPM terhadap Rencana")
 
 fig, ax = plt.subplots(figsize=(14, 6))
 sns.barplot(x="Provinsi", y="Realisasi_vs_Rencana_KPM", data=df, ax=ax)
@@ -118,7 +116,7 @@ st.pyplot(fig)
 # 2.2 BAR CHART – REALISASI ANGGARAN (%) terhadap RENCANA
 
 
-st.subheader("📍 Persentase Realisasi Anggaran terhadap Rencana")
+st.subheader("Persentase Realisasi Anggaran terhadap Rencana")
 
 fig, ax = plt.subplots(figsize=(14, 6))
 sns.barplot(x="Provinsi", y="Realisasi_vs_Rencana_Anggaran", data=df, ax=ax)
@@ -128,7 +126,7 @@ ax.set_ylabel("Persentase (%)")
 ax.set_title("Persentase Realisasi Anggaran terhadap Rencana")
 ax.axhline(100, color="red", linestyle="--")
 
-# === Tambahkan label persentase ===
+# label persentase 
 for p, value in zip(ax.patches, df["Realisasi_vs_Rencana_Anggaran"]):
     ax.text(
         p.get_x() + p.get_width() / 2,
@@ -145,7 +143,7 @@ st.pyplot(fig)
 
 #   3. HUBUNGAN DATA
 
-st.header("📙 3. Visualisasi Hubungan (Correlation)")
+st.header("3. Visualisasi Hubungan (Correlation)")
 
 # Scatter hubungan KPM & Anggaran
 st.subheader("🔸 Scatter: KPM vs Anggaran")
@@ -192,12 +190,12 @@ st.pyplot(fig)
 
 #   4. CLUSTERING 
 
-st.subheader("📌 Clustering Provinsi Berdasarkan Kebutuhan Bantuan Sosial (Lebih Jelas)")
+st.subheader("Clustering Provinsi Berdasarkan Kebutuhan Bantuan Sosial (Lebih Jelas)")
 
-# Ubah skala anggaran ke per 10 juta
+#  skala anggaran ke per 10 juta
 df["Realisasi_Anggaran_10Juta"] = df["Realisasi_Anggaran"] / 10_000_000
 
-# Tambahkan jitter agar titik tidak saling bertumpukan
+# jitter 
 import numpy as np
 df["KPM_jitter"] = df["Realisasi_Jumlah_KPM"] + np.random.uniform(-0.5, 0.5, size=len(df))
 df["Anggaran_jitter"] = df["Realisasi_Anggaran_10Juta"] + np.random.uniform(-0.3, 0.3, size=len(df))
@@ -219,10 +217,9 @@ ax.set_xlabel("Jumlah KPM (Keluarga Penerima Manfaat)")
 ax.set_ylabel("Anggaran (dalam satuan 10 Juta Rupiah)")
 ax.set_title("Clustering Provinsi Berdasarkan Kebutuhan Bantuan Sosial")
 
-# Tambahkan grid
 ax.grid(True, linestyle="--", alpha=0.5)
 
-# Tambahkan label provinsi (digeser agar tidak menumpuk)
+# label provinsi 
 for i in range(df.shape[0]):
     ax.text(
         df["KPM_jitter"].iloc[i] + 0.5,

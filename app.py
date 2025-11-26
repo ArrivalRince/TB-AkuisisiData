@@ -14,7 +14,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("📊 Dashboard Analisis Bantuan Sosial Pangan Indonesia")
+st.title("Dashboard Analisis Bantuan Sosial Pangan Indonesia")
 
 st.write("""
 Selamat datang di dashboard analisis bantuan sosial pangan.  

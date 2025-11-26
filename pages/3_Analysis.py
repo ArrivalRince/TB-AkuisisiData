@@ -4,16 +4,16 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 
-st.title("📊 Analysis – K-Means Clustering Bantuan Sosial")
+st.title("Analysis K-Means Clustering Bantuan Sosial")
 
 # Cek data dari preprocessing
 if "data" not in st.session_state or st.session_state["data"] is None:
     st.warning("Silakan lakukan preprocessing terlebih dahulu!")
     st.stop()
-
+    
 df = st.session_state["data"]
 
-st.subheader("📌 Data Siap Analisis")
+st.subheader("Data Siap Analisis")
 st.dataframe(df, use_container_width=True)
 
 # Kolom yang digunakan untuk clustering
@@ -35,7 +35,7 @@ scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 # Elbow method
-st.subheader("📐 Penentuan Jumlah Cluster (Elbow Method)")
+st.subheader("Penentuan Jumlah Cluster (Elbow Method)")
 wcss = []
 K = range(1, 10)
 
@@ -63,5 +63,5 @@ st.session_state["data"] = df
 
 st.success("Clustering selesai!")
 
-st.subheader("📄 Hasil Cluster")
+st.subheader("Hasil Cluster")
 st.dataframe(df[["Provinsi"] + features + ["Cluster"]], use_container_width=True)

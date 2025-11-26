@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.title("🧹 Preprocessing Data BANSOS PANGAN")
+st.title("Preprocessing Data BANSOS PANGAN")
 
 # Load dataset
 try:
@@ -10,11 +10,11 @@ except:
     st.error("Dataset belum diupload. Silakan upload di menu Input Data.")
     st.stop()
 
-st.subheader("📌 Data Sebelum Preprocessing")
+st.subheader("Data Sebelum Preprocessing")
 st.dataframe(df, use_container_width=True)
 
 # 1. Membersihkan baris tidak valid
-st.subheader("🗑 Menghapus Baris Tidak Valid (Indonesia, 0, Catatan, BPNT)")
+st.subheader("Menghapus Baris Tidak Valid (Indonesia, 0, Catatan, BPNT)")
 
 invalid_keywords = ["Indonesia", "0", "Catatan", "Bantuan Pangan Non-Tunai (BPNT)"]
 
@@ -28,10 +28,8 @@ st.success(f"Baris dihapus: {before_rows - after_rows} baris")
 st.dataframe(df, use_container_width=True)
 
 
-# =========================
 # 2. Cek nilai kosong (NA)
-# =========================
-st.subheader("🔍 Deteksi Nilai Kosong (NA)")
+st.subheader(" Deteksi Nilai Kosong (NA)")
 
 na_info = df.isna().sum()
 
@@ -42,10 +40,9 @@ if na_info.sum() == 0:
 else:
     st.warning("Dataset memiliki nilai kosong.")
 
-# =========================
 # 3. Opsi Penanganan Nilai Kosong
-# =========================
-st.subheader("⚙ Pilih Metode Penanganan NA")
+
+st.subheader("Pilih Metode Penanganan NA")
 
 option = st.radio(
     "Pilih metode:",
@@ -71,9 +68,8 @@ elif option == "Hapus baris yang memiliki NA":
     df_clean = df_clean.dropna()
     st.success("Baris berisi NA telah dihapus seluruhnya.")
 
-# =========================
-# 4. Rename kolom panjang → Nama pendek
-# =========================
+
+# 4. Rename kolom panjang  
 df_clean.rename(columns={
     "Rencana Jumlah Keluarga Penerima Manfaat (KPM) Bantuan Sosial Pangan (BANSOS PANGAN)": "Rencana_Jumlah_KPM",
     "Realisasi Jumlah Keluarga Penerima Manfaat (KPM) Bantuan Sosial Pangan (BANSOS PANGAN)": "Realisasi_Jumlah_KPM",
@@ -81,16 +77,15 @@ df_clean.rename(columns={
     "Realisasi Anggaran Bantuan Sosial Pangan (BANSOS PANGAN) (Rp)": "Realisasi_Anggaran"
 }, inplace=True)
 
-# =========================
 # 5. Hasil Akhir
-# =========================
-st.subheader("📊 Data Setelah Preprocessing")
+
+st.subheader("Data Setelah Preprocessing")
 st.dataframe(df_clean, use_container_width=True)
 
 # Simpan hasil preprocessing ke CSV
 df_clean.to_csv("data/clean_dataset.csv", index=False)
 
-# 🔥 SIMPAN KE SESSION STATE AGAR BISA DIBACA HALAMAN ANALYSIS
+# SIMPAN KE SESSION STATE AGAR BISA DIBACA HALAMAN ANALYSIS
 st.session_state["data"] = df_clean
 
 st.success("Preprocessing selesai! Data disimpan dan siap dianalisis.")
