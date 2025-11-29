@@ -84,7 +84,7 @@ df["Realisasi_vs_Rencana_Anggaran"] = (df["Realisasi_Anggaran"] / df["Rencana_An
 
 
 
-# 2.1 BAR CHART – REALISASI KPM (%) terhadap RENACANA
+# 2.1 BAR CHART REALISASI KPM (%) terhadap RENACANA
 
 st.subheader("Persentase Realisasi KPM terhadap Rencana")
 
@@ -113,7 +113,7 @@ for p, value in zip(ax.patches, df["Realisasi_vs_Rencana_KPM"]):
 st.pyplot(fig)
 
 
-# 2.2 BAR CHART – REALISASI ANGGARAN (%) terhadap RENCANA
+# 2.2 BAR CHART REALISASI ANGGARAN (%) terhadap RENCANA
 
 
 st.subheader("Persentase Realisasi Anggaran terhadap Rencana")
@@ -143,36 +143,6 @@ st.pyplot(fig)
 
 #   3. HUBUNGAN DATA
 
-st.header("3. Visualisasi Hubungan (Correlation)")
-
-# Scatter hubungan KPM & Anggaran
-st.subheader("🔸 Scatter: KPM vs Anggaran")
-
-fig, ax = plt.subplots(figsize=(7, 5))
-sns.scatterplot(
-    x="Realisasi_Jumlah_KPM",
-    y="Realisasi_Anggaran",
-    data=df,
-    s=120
-)
-ax.set_xlabel("Jumlah KPM")
-ax.set_ylabel("Anggaran (Rp)")
-st.pyplot(fig)
-
-# Scatter + regression line
-st.subheader("🔸 Scatter + Garis Regresi")
-
-fig, ax = plt.subplots(figsize=(7, 5))
-sns.regplot(
-    x="Realisasi_Jumlah_KPM",
-    y="Realisasi_Anggaran",
-    data=df,
-    scatter_kws={"s": 120}
-)
-ax.set_xlabel("Jumlah KPM")
-ax.set_ylabel("Anggaran (Rp)")
-st.pyplot(fig)
-
 # Heatmap korelasi
 st.subheader("🔸 Heatmap Korelasi")
 
@@ -190,7 +160,7 @@ st.pyplot(fig)
 
 #   4. CLUSTERING 
 
-st.subheader("Clustering Provinsi Berdasarkan Kebutuhan Bantuan Sosial (Lebih Jelas)")
+st.subheader("Clustering Provinsi Berdasarkan Kebutuhan Bantuan Sosial")
 
 #  skala anggaran ke per 10 juta
 df["Realisasi_Anggaran_10Juta"] = df["Realisasi_Anggaran"] / 10_000_000
@@ -231,7 +201,7 @@ for i in range(df.shape[0]):
 
 st.pyplot(fig)
 
-st.subheader("📄 Rangkuman Per Cluster (Rata-Rata)")
+st.subheader("Rangkuman Per Cluster (Rata-Rata)")
 summary = df.groupby("Cluster")[["Realisasi_Jumlah_KPM", "Realisasi_Anggaran"]].mean()
 summary["Realisasi_Anggaran (Rp)"] = summary["Realisasi_Anggaran"].apply(lambda x: f"{x:,.0f}")
 summary.drop(columns=["Realisasi_Anggaran"], inplace=True)

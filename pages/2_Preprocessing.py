@@ -14,9 +14,9 @@ st.subheader("Data Sebelum Preprocessing")
 st.dataframe(df, use_container_width=True)
 
 # 1. Membersihkan baris tidak valid
-st.subheader("Menghapus Baris Tidak Valid (Indonesia, 0, Catatan, BPNT)")
+st.subheader("Menghapus Baris Tidak Valid")
 
-invalid_keywords = ["Indonesia", "0", "Catatan", "Bantuan Pangan Non-Tunai (BPNT)"]
+invalid_keywords = ["Indonesia"]
 
 before_rows = df.shape[0]
 
