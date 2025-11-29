@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_extras.colored_header import colored_header
 
-# ======== HEADER ========
+# header
 st.markdown("""
     <div style="
         background: linear-gradient(90deg, #4992b7, #2575FC);
