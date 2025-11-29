@@ -97,7 +97,7 @@ ax.set_title("Persentase Realisasi Jumlah KPM terhadap Rencana")
 ax.axhline(100, color="red", linestyle="--")
 
 
-# = label persentase di atas batang =
+# label persentase di atas batang 
 for p, value in zip(ax.patches, df["Realisasi_vs_Rencana_KPM"]):
     ax.text(
         p.get_x() + p.get_width() / 2,
@@ -144,7 +144,7 @@ st.pyplot(fig)
 #   3. HUBUNGAN DATA
 
 # Heatmap korelasi
-st.subheader("🔸 Heatmap Korelasi")
+st.subheader("3. Heatmap Korelasi")
 
 corr = df[[
     "Realisasi_Jumlah_KPM",
@@ -160,7 +160,7 @@ st.pyplot(fig)
 
 #   4. CLUSTERING 
 
-st.subheader("Clustering Provinsi Berdasarkan Kebutuhan Bantuan Sosial")
+st.subheader("4. Clustering Provinsi Berdasarkan Kebutuhan Bantuan Sosial")
 
 #  skala anggaran ke per 10 juta
 df["Realisasi_Anggaran_10Juta"] = df["Realisasi_Anggaran"] / 10_000_000
