@@ -16,7 +16,7 @@ st.dataframe(df, use_container_width=True)
 # 1. Membersihkan baris tidak valid
 st.subheader("Menghapus Baris Tidak Valid")
 
-invalid_keywords = ["Indonesia"]
+invalid_keywords = ["Indonesia", "Catatan", "Bantuan Pangan Non-Tunai (BPNT)/<i>Cashless Food Assistance Programme</i>"]
 
 before_rows = df.shape[0]
 
@@ -89,4 +89,3 @@ df_clean.to_csv("data/clean_dataset.csv", index=False)
 st.session_state["data"] = df_clean
 
 st.success("Preprocessing selesai! Data disimpan dan siap dianalisis.")
-
