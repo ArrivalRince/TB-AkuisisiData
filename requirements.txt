@@ -4,4 +4,6 @@ scikit-learn
 matplotlib
 streamlit-option-menu
 streamlit-extras
+seaborn
+
 
